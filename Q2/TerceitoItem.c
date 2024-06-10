@@ -1,29 +1,26 @@
 #include <pthread.h>
 #include <stdlib.h>
-#include <semaphore.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <assert.h>
 
 
 #define BUFFER_SIZE 40
-#define CONSUMERS 1
-#define PRODUCERS 8
-#define TEMPO_CONSUMIDOR 1
-#define TEMPO_PRODUTOR 2
+#define CONSUMERS 4
+#define PRODUCERS 16
+#define TEMPO_CONSUMIDOR 3
+#define TEMPO_PRODUTOR 3
+
+
 
 long buffer[BUFFER_SIZE];
 int produtorIndex = 0;
 int consumerIndex = 0;
-sem_t cheio;
-sem_t vazio;
-sem_t escrevendoIndexProductor;
+
 
 void produz(int valor){
-  sem_wait(&escrevendoIndexProductor); 
   buffer[produtorIndex] = valor;
   produtorIndex = (produtorIndex + 1) % BUFFER_SIZE;
-  sem_post(&escrevendoIndexProductor);
 }
 
 int consome(){
@@ -58,10 +55,8 @@ void* produtor(void *arg){
   long loops = 4*i + 5;
   for (i = 0; i < loops; i++) {
     sleep(TEMPO_PRODUTOR);
-    sem_wait(&cheio);
     produz(tid); 
     printf("Produtor %ld Escreveu %ld no buffer \n", tid,tid);
-    sem_post(&vazio); 
  } 
   pthread_exit(NULL);
 
@@ -75,11 +70,9 @@ void *consumidor(void *arg) {
 
 
   while (tmp != -1) {
-    sem_wait(&vazio); 
     sleep(TEMPO_CONSUMIDOR);
     tmp = consome(); 
     printf("Consumidor %ld leu %d indo para a posição: %d !!!\n", tid, tmp,consumerIndex);
-    sem_post(&cheio); 
   }
   pthread_exit(NULL);
 
@@ -97,9 +90,6 @@ int main(){
   pthread_t producersT[PRODUCERS];
   pthread_t printT;
 
-  sem_init(&cheio, 0, BUFFER_SIZE);
-  sem_init(&vazio, 0, 0);
-  sem_init(&escrevendoIndexProductor, 0, 1);
 
   for (p = 0; p < PRODUCERS; p++) {
     rc = pthread_create(&producersT[p], NULL, produtor, (void*)p);

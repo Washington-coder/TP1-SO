@@ -7,7 +7,7 @@
 
 
 #define BUFFER_SIZE 40
-#define CONSUMERS 1
+#define CONSUMERS 8
 #define PRODUCERS 8
 #define TEMPO_CONSUMIDOR 1
 #define TEMPO_PRODUTOR 2
