@@ -18,6 +18,7 @@ int consumerIndex = 0;
 sem_t cheio;
 sem_t vazio;
 sem_t escrevendoIndexProductor;
+sem_t escrevendoIndexConsumidor;
 
 void produz(int valor){
   sem_wait(&escrevendoIndexProductor); 
@@ -27,8 +28,12 @@ void produz(int valor){
 }
 
 int consome(){
+
+  sem_wait(&escrevendoIndexConsumidor); 
   int tmp = buffer[consumerIndex];
   consumerIndex = (consumerIndex + 1) % BUFFER_SIZE;
+  sem_post(&escrevendoIndexConsumidor);
+
   return tmp;
 }
 
@@ -57,10 +62,10 @@ void* produtor(void *arg){
   printf("Produtor %ld Iniciado!\n", tid);
   long loops = 4*i + 5;
   for (i = 0; i < loops; i++) {
-    sleep(TEMPO_PRODUTOR);
     sem_wait(&cheio);
+    sleep(TEMPO_PRODUTOR);
     produz(tid); 
-    printf("Produtor %ld Escreveu %ld no buffer \n", tid,tid);
+    printf("Produtor %ld Escreveu %ld no buffer indo para posição: %d\n", tid,tid,produtorIndex);
     sem_post(&vazio); 
  } 
   pthread_exit(NULL);
@@ -100,7 +105,7 @@ int main(){
   sem_init(&cheio, 0, BUFFER_SIZE);
   sem_init(&vazio, 0, 0);
   sem_init(&escrevendoIndexProductor, 0, 1);
-
+  sem_init(&escrevendoIndexConsumidor, 0, 1);
   for (p = 0; p < PRODUCERS; p++) {
     rc = pthread_create(&producersT[p], NULL, produtor, (void*)p);
     rc = 0;

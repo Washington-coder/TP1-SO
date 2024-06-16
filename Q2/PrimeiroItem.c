@@ -57,10 +57,10 @@ void* produtor(void *arg){
   printf("Produtor %ld Iniciado!\n", tid);
   long loops = 4*i + 5;
   for (i = 0; i < loops; i++) {
-    sleep(TEMPO_PRODUTOR);
     sem_wait(&cheio);
+    sleep(TEMPO_PRODUTOR);
     produz(tid); 
-    printf("Produtor %ld Escreveu %ld no buffer \n", tid,tid);
+    printf("Produtor %ld Escreveu %ld no buffer indo para posição: %d\n", tid,tid,produtorIndex);
     sem_post(&vazio); 
  } 
   pthread_exit(NULL);
