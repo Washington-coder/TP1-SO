@@ -7,16 +7,17 @@
 
 #define BUFFER_SIZE 40
 #define CONSUMERS 4
-#define PRODUCERS 16
-#define TEMPO_CONSUMIDOR 3
-#define TEMPO_PRODUTOR 3
+#define PRODUCERS 8
+#define TEMPO_CONSUMIDOR 2
+#define TEMPO_PRODUTOR 1
 
 
 
 long buffer[BUFFER_SIZE];
 int produtorIndex = 0;
 int consumerIndex = 0;
-
+long produtorTotal  = 0;
+long consumerTotal = 0;
 
 void produz(int valor){
   buffer[produtorIndex] = valor;
@@ -26,6 +27,8 @@ void produz(int valor){
 int consome(){
   int tmp = buffer[consumerIndex];
   consumerIndex = (consumerIndex + 1) % BUFFER_SIZE;
+  consumerTotal++;
+
   return tmp;
 }
 
@@ -52,12 +55,16 @@ void* produtor(void *arg){
   long tid;
   tid = (long)arg;
   printf("Produtor %ld Iniciado!\n", tid);
+  sleep(2);
   long loops = 4*i + 5;
+  produtorTotal += loops;
+
   for (i = 0; i < loops; i++) {
     sleep(TEMPO_PRODUTOR);
     produz(tid); 
     printf("Produtor %ld Escreveu %ld no buffer \n", tid,tid);
  } 
+  printf("Produtor %ld terminou!!!\n",tid);
   pthread_exit(NULL);
 
 }
@@ -69,13 +76,14 @@ void *consumidor(void *arg) {
   printf("Consumidor %ld Iniciado!\n", tid);
 
 
-  while (tmp != -1) {
+  while ((produtorTotal - consumerTotal) != 0) {
     sleep(TEMPO_CONSUMIDOR);
     tmp = consome(); 
     printf("Consumidor %ld leu %d indo para a posição: %d !!!\n", tid, tmp,consumerIndex);
   }
-  pthread_exit(NULL);
-
+  printf("TODO O BUFFER FOI CONSUMIDO ENCERRANDO O PROGRAMA!!!!!\n\n");
+  printf("%ld caracteres escritos %ld lidos",produtorTotal,consumerTotal);
+  exit(0);
 }
 
 int main(){
@@ -117,7 +125,6 @@ int main(){
   for (c = 0; c < CONSUMERS; c++) {
     rc = pthread_join(consumersT[c], NULL); assert(rc == 0);
   }
-  printf("todas as thereats acabaram!!!\n");
 
  
 
