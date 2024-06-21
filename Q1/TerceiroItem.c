@@ -5,13 +5,13 @@
 
 #define NUM_ESCRITORES 5
 
-int saldo = 1000;
+int saldo = 50;
 
 void* escritor(void* arg) {
     int id = *((int*)arg);
     while (1) {
         int operacao = rand() % 2;
-        int valor = rand() % 100;
+        int valor = 1;
         
         if (operacao == 0) {
             int novo_saldo = saldo + valor;

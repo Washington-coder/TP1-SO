@@ -6,7 +6,7 @@
 #define NUM_LEITORES 5
 #define NUM_ESCRITORES 3
 
-int saldo = 1000;
+int saldo = 50;
 
 void* leitor(void* arg) {
     int id = *((int*)arg);
@@ -22,7 +22,7 @@ void* escritor(void* arg) {
     int id = *((int*)arg);
     while (1) {
         int operacao = rand() % 2;
-        int valor = rand() % 100;
+        int valor = 1;
         
         if (operacao == 0) {
             saldo += valor;
